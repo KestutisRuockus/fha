@@ -1,11 +1,15 @@
+import useFetchImages from "../hooks/useFetchImages";
 import ImageCard from "./ImageCard";
 
 function ImagesContainer() {
+  const { imagesList, loading } = useFetchImages();
+
   return (
     <div className="container">
-      <ImageCard />
-      <ImageCard />
-      <ImageCard />
+      {!loading &&
+        imagesList.map((image) => (
+          <ImageCard key={image.id} imageDetails={image} />
+        ))}
     </div>
   );
 }

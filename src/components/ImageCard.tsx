@@ -1,11 +1,14 @@
-const ImageCard = () => {
+import type { Image } from "../types/types";
+
+const ImageCard = ({ imageDetails }: { imageDetails: Image }) => {
+  const { photographer, src, alt } = imageDetails;
   return (
     <div className="image-card">
-      <img src="https://picsum.photos/200" alt="" />
+      <img src={src.medium} alt={alt} />
       <div className="image-details">
-        <h1>Water Dog </h1>
+        <h1>{alt}</h1>
         <div className="dash"></div>
-        <p>Brad Nickerson</p>
+        <p>{photographer}</p>
         <button>Favourite</button>
       </div>
     </div>
