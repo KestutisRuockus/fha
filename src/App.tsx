@@ -1,7 +1,8 @@
+import ImagesContainer from "./components/ImagesContainer";
 import "./index.css";
 
 function App() {
-  return <>FHA</>;
+  return <ImagesContainer />;
 }
 
 export default App;

@@ -13,4 +13,116 @@
   --bg-color: #e7e7e7;
   --text-color: #fff;
   --border-color: #fff;
+  --hover-bg-color: #fff;
+  --hover-text-color: #000;
+  --hover-border-color: #000;
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+.container {
+  width: 100%;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  margin: 0 auto;
+}
+
+/* Images components */
+.image-card {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.image-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-details {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+  color: var(--text-color);
+  background-color: rgb(0, 0, 0, 0);
+  transition: all 0.3s;
+  opacity: 0;
+}
+
+.image-card:hover .image-details {
+  background-color: rgb(0, 0, 0, 0.5);
+  opacity: 1;
+}
+
+.image-details h1 {
+  font-size: 40px;
+  font-weight: bold;
+  max-width: 90%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  line-height: 1;
+  margin: 0 auto;
+}
+
+.image-details .dash {
+  border: 2px solid var(--border-color);
+  width: 20%;
+  margin: 6px 0;
+}
+
+.image-details p {
+  font-style: italic;
+  font-size: 26px;
+}
+
+.image-details button {
+  color: var(--text-color);
+  font-size: 20px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 12px 20px;
+  margin: 24px 0;
+  cursor: pointer;
+}
+
+.image-details button:hover {
+  background-color: var(--hover-bg-color);
+  color: var(--hover-text-color);
+  border-color: var(--hover-border-color);
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 2rem;
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 4rem;
+    gap: 4rem;
+  }
 }
