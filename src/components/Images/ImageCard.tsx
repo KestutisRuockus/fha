@@ -1,5 +1,5 @@
 import React from "react";
-import type { Image } from "../types/types";
+import type { Image } from "../../types/types";
 
 const ImageCard = React.forwardRef<HTMLDivElement, { imageDetails: Image }>(
   ({ imageDetails }, lastElementRef) => {

@@ -1,8 +1,13 @@
-import ImagesContainer from "./components/ImagesContainer";
+import ImagesContainer from "./components/Images/ImagesContainer";
+import AppLayout from "./components/layout/AppLayout";
 import "./index.css";
 
 function App() {
-  return <ImagesContainer />;
+  return (
+    <AppLayout>
+      <ImagesContainer />
+    </AppLayout>
+  );
 }
 
 export default App;

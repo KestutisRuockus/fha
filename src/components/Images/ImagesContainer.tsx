@@ -1,11 +1,9 @@
 import { useCallback, useRef } from "react";
-import useFetchImages from "../hooks/useFetchImages";
+import useFetchImages from "../../hooks/useFetchImages";
 import ImageCard from "./ImageCard";
 
 function ImagesContainer() {
   const { imagesList, loading, hasMoreResults, setPage } = useFetchImages();
-
-  console.log(imagesList.length);
 
   const observer = useRef<IntersectionObserver | null>(null);
 

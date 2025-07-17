@@ -22,3 +22,15 @@ export type InfiniteScrollProps = {
   loading: boolean;
   onLoadMore: () => void;
 };
+
+export type ActiveComponent = "photos" | "favourite";
+
+export type LinkProps = {
+  name: string;
+  component: ActiveComponent;
+};
+
+export type NavbarProps = {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
