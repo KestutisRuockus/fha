@@ -16,3 +16,9 @@ export type Image = {
   avg_color: string;
   alt: string;
 };
+
+export type InfiniteScrollProps = {
+  hasMore: boolean;
+  loading: boolean;
+  onLoadMore: () => void;
+};

@@ -1,29 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { Image } from "../types/types";
 
 const useFetchImages = () => {
-  const [imagesList, setImagesList] = useState<Image[] | []>([]);
-  const [page, setPage] = useState<number>(1);
-  const [perPage] = useState<number>(10);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasMoreResulsts, setHasMoreResults] = useState<boolean>(true);
-  const isFetchingRef = useRef<boolean>(false);
+  const [imagesList, setImagesList] = useState<Image[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMoreResults, setHasMoreResults] = useState(true);
+  const isFetchingRef = useRef(false);
 
-  const fetchImages = useCallback(async () => {
+  const fetchImages = useCallback(async (pageToFetch: number) => {
+    const API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+    const BASE_URL = import.meta.env.VITE_PEXELS_BASE_URL;
+    const perPage = 10;
+
+    if (!API_KEY || !BASE_URL) {
+      throw new Error("Missing API key or base URL in environment variables");
+    }
     if (isFetchingRef.current) return;
 
-    const API_KEY = "lxh1DxF1eYJWsFAAWb0fR2u7v7UIbG2qKDaCmROu1YW25Z6zVCpAa9qG";
-    const BASE_URL = "https://api.pexels.com/v1/";
-
-    setLoading(true);
     isFetchingRef.current = true;
+    setLoading(true);
 
     try {
-      const url = `${BASE_URL}curated?page=${page}&per_page=${perPage}`;
+      const url = `${BASE_URL}curated?page=${pageToFetch}&per_page=${perPage}`;
       const response = await fetch(url, {
-        headers: {
-          Authorization: API_KEY,
-        },
+        headers: { Authorization: API_KEY },
       });
 
       if (!response.ok) {
@@ -40,21 +41,21 @@ const useFetchImages = () => {
         alt: photo.alt,
       }));
 
-      setHasMoreResults(json.next_page ? true : false);
       setImagesList((prev) => [...prev, ...requiredData]);
+      setHasMoreResults(!!json.next_page);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
-      isFetchingRef.current = false;
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [page, perPage]);
+  }, []);
 
   useEffect(() => {
-    fetchImages();
-  }, [fetchImages, page]);
+    fetchImages(page);
+  }, [page, fetchImages]);
 
-  return { imagesList, setPage, loading, hasMoreResulsts };
+  return { imagesList, setPage, loading, hasMoreResults };
 };
 
 export default useFetchImages;
