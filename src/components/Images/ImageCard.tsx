@@ -16,7 +16,20 @@ const ImageCard = React.forwardRef<
 
   return (
     <div className="image-card" ref={lastElementRef}>
-      <img src={src.medium} alt={alt} />
+      <img
+        src={src.medium}
+        alt={alt}
+        loading="lazy"
+        srcSet={`
+           ${src.tiny} 280w,
+           ${src.small} 130w,
+          ${src.medium} 350w,
+          ${src.large} 940w,
+          ${src.large2x} 1880w
+  `}
+        sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
+        style={{ backgroundColor: imageDetails.avg_color }}
+      />
       <div className="image-details">
         <h1>{alt}</h1>
         <div className="dash"></div>
