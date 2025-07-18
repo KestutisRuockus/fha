@@ -3,7 +3,7 @@ import Navbar from "../navbar/Navbar";
 import { useState } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
     <main>

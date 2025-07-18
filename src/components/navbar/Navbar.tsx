@@ -58,7 +58,7 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
 
       <nav className={`${isOpen ? "expanded" : "collapsed"}`}>
         {navLinks.map((link) => (
-          <Link linkDetails={link} />
+          <Link key={link.name} linkDetails={link} />
         ))}
       </nav>
     </aside>

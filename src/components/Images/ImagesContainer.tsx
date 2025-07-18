@@ -1,9 +1,13 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useFetchImages from "../../hooks/useFetchImages";
 import ImageCard from "./ImageCard";
+import type { Image } from "../../types/types";
+import { getFavouritePhotos } from "../../utils/localStorage";
 
 function ImagesContainer() {
   const { imagesList, loading, hasMoreResults, setPage } = useFetchImages();
+
+  const [favouritePhotos, setFavouritePhotos] = useState<Image[] | []>([]);
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -23,6 +27,11 @@ function ImagesContainer() {
     [loading, hasMoreResults, setPage]
   );
 
+  useEffect(() => {
+    const photos = getFavouritePhotos();
+    setFavouritePhotos(photos);
+  }, []);
+
   return (
     <div className="container">
       {imagesList.map((image, index) => {
@@ -33,6 +42,9 @@ function ImagesContainer() {
             key={`${image.id}-${index}`}
             imageDetails={image}
             ref={isLast ? lastElementRef : null}
+            isFavourited={favouritePhotos.some(
+              (photo) => photo.id === image.id
+            )}
           />
         );
       })}
