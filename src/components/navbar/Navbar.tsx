@@ -1,6 +1,8 @@
 import "./navbar.css";
 import { navLinks } from "../../constants/navLinks";
-import type { LinkProps, NavbarProps } from "../../types/types";
+import type { LinkProps, NavbarProps, ViewType } from "../../types/types";
+import { useContext } from "react";
+import { ViewContext } from "../../context/ViewContext";
 
 const HamburgerIcon = () => {
   return (
@@ -42,11 +44,26 @@ const CloseIcon = () => {
   );
 };
 
-const Link = ({ linkDetails }: { linkDetails: LinkProps }) => {
-  return <p>{linkDetails.name}</p>;
+const Link = ({
+  linkDetails,
+  onClick,
+}: {
+  linkDetails: LinkProps;
+  onClick: (view: ViewType) => void;
+}) => {
+  return (
+    <p onClick={() => onClick(linkDetails.component)}>{linkDetails.name}</p>
+  );
 };
 
 const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
+  const viewContext = useContext(ViewContext);
+  if (!viewContext) {
+    throw new Error("Navbar must be used within a ViewProvider");
+  }
+
+  const { setView } = viewContext;
+
   return (
     <aside className={isOpen ? "expanded" : "collapsed"}>
       <button
@@ -58,7 +75,7 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
 
       <nav className={`${isOpen ? "expanded" : "collapsed"}`}>
         {navLinks.map((link) => (
-          <Link key={link.name} linkDetails={link} />
+          <Link key={link.name} linkDetails={link} onClick={setView} />
         ))}
       </nav>
     </aside>

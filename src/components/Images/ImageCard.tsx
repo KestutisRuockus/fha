@@ -4,14 +4,22 @@ import { toggleFavouritePhoto } from "../../utils/localStorage";
 
 const ImageCard = React.forwardRef<
   HTMLDivElement,
-  { imageDetails: Image; isFavourited: boolean }
->(({ imageDetails, isFavourited }, lastElementRef) => {
+  {
+    imageDetails: Image;
+    isFavourited: boolean;
+    onRemove?: (photoId: number) => void;
+  }
+>(({ imageDetails, isFavourited, onRemove }, lastElementRef) => {
   const { photographer, src, alt } = imageDetails;
   const [favourited, setFavourited] = useState<boolean>(isFavourited);
 
   const favouritePhoto = () => {
-    toggleFavouritePhoto(imageDetails);
-    setFavourited(!favourited);
+    if (onRemove) {
+      onRemove(imageDetails.id);
+    } else {
+      toggleFavouritePhoto(imageDetails);
+      setFavourited(!favourited);
+    }
   };
 
   return (

@@ -23,7 +23,7 @@ export type InfiniteScrollProps = {
   onLoadMore: () => void;
 };
 
-export type ActiveComponent = "photos" | "favourite";
+export type ActiveComponent = "images" | "favourites";
 
 export type LinkProps = {
   name: string;
@@ -33,4 +33,11 @@ export type LinkProps = {
 export type NavbarProps = {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export type ViewType = "images" | "favourites";
+
+export type ViewContextType = {
+  view: ViewType;
+  setView: (view: ViewType) => void;
 };
