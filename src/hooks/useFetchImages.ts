@@ -14,7 +14,9 @@ const useFetchImages = () => {
     const perPage = 10;
 
     if (!API_KEY || !BASE_URL) {
-      throw new Error("Missing API key or base URL in environment variables");
+      console.log("Missing API key or base URL in environment variables");
+      setLoading(false);
+      return;
     }
     if (isFetchingRef.current) return;
 
