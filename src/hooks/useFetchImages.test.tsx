@@ -1,4 +1,5 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { SearchContext } from "../context/SearchContext";
 import useFetchImages from "./useFetchImages";
 
 const mockPhotos = [
@@ -18,7 +19,19 @@ const mockPhotos = [
   },
 ];
 
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <SearchContext.Provider value={{ query: "nature", setQuery: () => {} }}>
+    {children}
+  </SearchContext.Provider>
+);
+
 beforeEach(() => {
+  beforeAll(() => {
+    // Set fake environment variables
+    import.meta.env.VITE_PEXELS_API_KEY = "fake-api-key";
+    import.meta.env.VITE_PEXELS_BASE_URL = "https://fake-api.com/v1/";
+  });
+
   vi.restoreAllMocks();
 });
 
@@ -28,7 +41,7 @@ describe("useFetchImages", () => {
       () => new Promise(() => {})
     ) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
     expect(result.current.imagesList).toEqual([]);
     expect(result.current.loading).toBe(true);
@@ -41,7 +54,11 @@ describe("useFetchImages", () => {
       json: async () => ({ photos: mockPhotos, next_page: true }),
     }) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     await act(async () => {
       await Promise.resolve();
@@ -59,14 +76,14 @@ describe("useFetchImages", () => {
       json: async () => ({ photos: mockPhotos, next_page: null }),
     }) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.hasMoreResults).toBe(false);
   });
 
-  it("handles non-OK response gracefullt", async () => {
+  it("handles non-OK response gracefully", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 500,
@@ -76,12 +93,11 @@ describe("useFetchImages", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(result.current.loading).toBe(false);
     expect(result.current.imagesList).toEqual([]);
   });
 
@@ -94,28 +110,24 @@ describe("useFetchImages", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(consoleSpyError).toHaveBeenCalledWith(expect.any(Error));
-    expect(result.current.loading).toBe(false);
     expect(result.current.imagesList).toEqual([]);
   });
 
   it("avoids duplicate fetches if already fetching", async () => {
-    let resolveFetch: (
-      value: Response | PromiseLike<Response>
-    ) => void = () => {};
-
+    let resolveFetch: (value: Response) => void = () => {};
     globalThis.fetch = vi.fn(
       () =>
         new Promise<Response>((resolve) => {
           resolveFetch = resolve;
         })
-    );
+    ) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
     act(() => {
       result.current.setPage(2);
@@ -123,6 +135,7 @@ describe("useFetchImages", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 
+    // Resolve the pending fetch
     resolveFetch(
       new Response(JSON.stringify({ photos: mockPhotos, next_page: null }), {
         status: 200,
@@ -130,27 +143,33 @@ describe("useFetchImages", () => {
       })
     );
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
   });
 
   it("fetches next page when setPage is called", async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ photos: mockPhotos, next_page: "page=3" }),
-    }) as unknown as typeof fetch;
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ photos: mockPhotos, next_page: "page=2" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ photos: mockPhotos, next_page: "page=3" }),
+      }) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     act(() => {
       result.current.setPage(2);
     });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-    expect(result.current.imagesList.length).toBe(4);
+    expect(result.current.imagesList.length).toBe(mockPhotos.length * 2);
   });
 
   it("logs a message and stops loading if API key or Base URL is missing", async () => {
@@ -161,9 +180,9 @@ describe("useFetchImages", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    const { result } = renderHook(() => useFetchImages());
+    const { result } = renderHook(() => useFetchImages(), { wrapper });
 
-    await act(async () => {});
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       "Missing API key or base URL in environment variables"

@@ -5,6 +5,7 @@ import type { Image } from "../../types/types";
 
 import useFetchImages from "../../hooks/useFetchImages";
 import { getFavouritePhotos } from "../../utils/localStorage";
+import { SearchContext } from "../../context/SearchContext";
 
 vi.mock("../../hooks/useFetchImages");
 vi.mock("../../utils/localStorage");
@@ -41,6 +42,14 @@ vi.mock("./ImageCard", () => ({
 const mockedUseFetchImages = vi.mocked(useFetchImages);
 const mockedGetFavouritePhotos = vi.mocked(getFavouritePhotos);
 
+const renderWithSearchProvider = () => {
+  return render(
+    <SearchContext.Provider value={{ query: "", setQuery: vi.fn() }}>
+      <ImagesContainer />
+    </SearchContext.Provider>
+  );
+};
+
 describe("ImagesContainer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -73,7 +82,7 @@ describe("ImagesContainer", () => {
 
     mockedGetFavouritePhotos.mockReturnValue([images[0]]);
 
-    render(<ImagesContainer />);
+    renderWithSearchProvider();
 
     const imageCards = screen.getAllByTestId("image-card");
     expect(imageCards).toHaveLength(2);
@@ -98,7 +107,12 @@ describe("ImagesContainer", () => {
     });
     mockedGetFavouritePhotos.mockReturnValue([]);
 
-    render(<ImagesContainer />);
+    renderWithSearchProvider();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  it("throws error if SearchContext is missing", () => {
+    const renderWithoutProvider = () => render(<ImagesContainer />);
+    expect(renderWithoutProvider).toThrow("must be used within a ViewProvider");
   });
 });

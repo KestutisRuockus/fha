@@ -2,31 +2,41 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { ViewContext } from "../../context/ViewContext";
 import Navbar from "./Navbar";
 import { navLinks } from "../../constants/navLinks";
+import { SearchContext } from "../../context/SearchContext";
 
 describe("Navbar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
+  beforeAll(() => {
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 375, // simulate mobile screen width
+    });
+  });
+
   const setIsOpenMock = vi.fn();
   const setViewMock = vi.fn();
+  const setQueryMock = vi.fn();
 
   const renderNavbar = (isOpen: boolean) =>
     render(
       <ViewContext.Provider value={{ view: "images", setView: setViewMock }}>
-        <Navbar isOpen={isOpen} setIsOpen={setIsOpenMock} />
+        <SearchContext.Provider value={{ query: "", setQuery: setQueryMock }}>
+          <Navbar isOpen={isOpen} setIsOpen={setIsOpenMock} />
+        </SearchContext.Provider>
       </ViewContext.Provider>
     );
 
   it("renders with collapsed state initially", () => {
     renderNavbar(false);
-    expect(screen.getByRole("button")).toHaveClass("icon-wrapper");
-    expect(screen.getByRole("button")).not.toHaveClass("rotated");
-    expect(screen.getByRole("button").querySelector("svg")).toBeInTheDocument();
-    expect(screen.getByRole("button").querySelector("svg")).toHaveAttribute(
-      "viewBox",
-      "0 0 24 24"
-    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("icon-wrapper");
+    expect(button).not.toHaveClass("rotated");
+    expect(button.querySelector("svg")).toBeInTheDocument();
+    expect(button.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
     expect(screen.getByRole("navigation")).toHaveClass("collapsed");
   });
 
@@ -52,15 +62,34 @@ describe("Navbar", () => {
     });
   });
 
-  it("clicking nav link calls setView with correct view", () => {
+  it("clicking nav link calls setView with correct view and setQuery, and closes menu on mobile", () => {
     renderNavbar(true);
-    fireEvent.click(screen.getByText(navLinks[0].name));
+    const firstLink = screen.getByText(navLinks[0].name);
+
+    fireEvent.click(firstLink);
+
     expect(setViewMock).toHaveBeenCalledWith(navLinks[0].component);
+    expect(setQueryMock).toHaveBeenCalledWith("");
+    expect(setIsOpenMock).toHaveBeenCalledWith(false); // closes menu on mobile
   });
 
   it("throws error if used without ViewContext", () => {
     expect(() =>
-      render(<Navbar isOpen={false} setIsOpen={setIsOpenMock} />)
+      render(
+        <SearchContext.Provider value={{ query: "", setQuery: () => {} }}>
+          <Navbar isOpen={false} setIsOpen={setIsOpenMock} />
+        </SearchContext.Provider>
+      )
     ).toThrow("Navbar must be used within a ViewProvider");
+  });
+
+  it("throws error if used without SearchContext", () => {
+    expect(() =>
+      render(
+        <ViewContext.Provider value={{ view: "images", setView: () => {} }}>
+          <Navbar isOpen={false} setIsOpen={setIsOpenMock} />
+        </ViewContext.Provider>
+      )
+    ).toThrow("Navbar must be used within a SearchProvider");
   });
 });

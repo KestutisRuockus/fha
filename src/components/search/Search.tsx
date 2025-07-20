@@ -41,6 +41,7 @@ const Search = ({ onSubmit }: { onSubmit: () => void }) => {
         }}
       />
       <svg
+        data-testid="search-icon"
         onClick={handleIpnutSubmit}
         xmlns="http://www.w3.org/2000/svg"
         width="24"
