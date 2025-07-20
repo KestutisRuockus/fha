@@ -4,6 +4,7 @@ import ImageCard from "./ImageCard";
 import type { Image } from "../../types/types";
 import { getFavouritePhotos } from "../../utils/localStorage";
 import { SearchContext } from "../../context/SearchContext";
+import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 
 function ImagesContainer() {
   const { imagesList, loading, hasMoreResults, setPage } = useFetchImages();
@@ -61,7 +62,7 @@ function ImagesContainer() {
           />
         );
       })}
-      {loading && <p>Loading...</p>}
+      {loading && <LoadingSpinner />}
     </div>
   );
 }
