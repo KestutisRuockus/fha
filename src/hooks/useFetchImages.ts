@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useContext } from "react";
 import type { Image } from "../types/types";
+import { SearchContext } from "../context/SearchContext";
 
 const useFetchImages = () => {
   const [imagesList, setImagesList] = useState<Image[]>([]);
@@ -7,55 +8,85 @@ const useFetchImages = () => {
   const [loading, setLoading] = useState(false);
   const [hasMoreResults, setHasMoreResults] = useState(true);
   const isFetchingRef = useRef(false);
+  const prevQueryRef = useRef<string>("");
 
-  const fetchImages = useCallback(async (pageToFetch: number) => {
-    const API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
-    const BASE_URL = import.meta.env.VITE_PEXELS_BASE_URL;
-    const perPage = 10;
+  const searchContext = useContext(SearchContext);
+  if (!searchContext) {
+    throw new Error("must be used within a ViewProvider");
+  }
 
-    if (!API_KEY || !BASE_URL) {
-      console.log("Missing API key or base URL in environment variables");
-      setLoading(false);
-      return;
-    }
-    if (isFetchingRef.current) return;
+  const { query } = searchContext;
 
-    isFetchingRef.current = true;
-    setLoading(true);
+  const fetchImages = useCallback(
+    async (pageToFetch: number, query: string = "") => {
+      const API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+      const BASE_URL = import.meta.env.VITE_PEXELS_BASE_URL;
+      const perPage = 10;
 
-    try {
-      const url = `${BASE_URL}curated?page=${pageToFetch}&per_page=${perPage}`;
-      const response = await fetch(url, {
-        headers: { Authorization: API_KEY },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
+      if (!API_KEY || !BASE_URL) {
+        console.log("Missing API key or base URL in environment variables");
+        setLoading(false);
+        return;
       }
+      if (isFetchingRef.current) return;
 
-      const json = await response.json();
+      isFetchingRef.current = true;
+      setLoading(true);
 
-      const requiredData: Image[] = json.photos.map((photo: Image) => ({
-        id: photo.id,
-        photographer: photo.photographer,
-        src: photo.src,
-        avg_color: photo.avg_color,
-        alt: photo.alt,
-      }));
+      try {
+        let url: string;
+        if (query) {
+          console.log(`QUERY EXIST: ${query}`);
+          url = `${BASE_URL}/search?query=${query}&page=${pageToFetch}&per_page=${perPage}`;
+        } else {
+          console.log(`QUERY IS EMPTY`);
+          url = `${BASE_URL}curated?page=${pageToFetch}&per_page=${perPage}`;
+        }
 
-      setImagesList((prev) => [...prev, ...requiredData]);
-      setHasMoreResults(!!json.next_page);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, []);
+        const response = await fetch(url, {
+          headers: { Authorization: API_KEY },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+
+        const requiredData: Image[] = json.photos.map((photo: Image) => ({
+          id: photo.id,
+          photographer: photo.photographer,
+          src: photo.src,
+          avg_color: photo.avg_color,
+          alt: photo.alt,
+        }));
+
+        setImagesList((prev) => [...prev, ...requiredData]);
+
+        setHasMoreResults(!!json.next_page);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+        isFetchingRef.current = false;
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchImages(page);
-  }, [page, fetchImages]);
+    if (prevQueryRef.current !== query) {
+      setImagesList([]);
+      setPage(1);
+      prevQueryRef.current = query;
+
+      fetchImages(1, query);
+    } else {
+      fetchImages(page, query);
+    }
+
+    fetchImages(page, query);
+  }, [page, fetchImages, query]);
 
   return { imagesList, setPage, loading, hasMoreResults };
 };

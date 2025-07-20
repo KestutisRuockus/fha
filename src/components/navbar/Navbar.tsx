@@ -3,6 +3,8 @@ import { navLinks } from "../../constants/navLinks";
 import type { LinkProps, NavbarProps, ViewType } from "../../types/types";
 import { useContext } from "react";
 import { ViewContext } from "../../context/ViewContext";
+import Search from "../search/Search";
+import { SearchContext } from "../../context/SearchContext";
 
 const HamburgerIcon = () => {
   return (
@@ -62,9 +64,16 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
     throw new Error("Navbar must be used within a ViewProvider");
   }
 
+  const searchContext = useContext(SearchContext);
+  if (!searchContext) {
+    throw new Error("Navbar must be used within a SearchProvider");
+  }
+
   const { setView } = viewContext;
+  const { setQuery } = searchContext;
 
   const handleOnClick = (component: ViewType) => {
+    setQuery("");
     setView(component);
     if (window.innerWidth < 768) {
       setIsOpen(false);
@@ -88,6 +97,7 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
             onClick={() => handleOnClick(link.component)}
           />
         ))}
+        <Search onSubmit={() => setIsOpen(false)} />
       </nav>
     </aside>
   );

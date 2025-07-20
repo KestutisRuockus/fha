@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from "react";
+
 type ImagesSrc = {
   original: string;
   large2x?: string;
@@ -40,4 +42,9 @@ export type ViewType = "images" | "favourites";
 export type ViewContextType = {
   view: ViewType;
   setView: (view: ViewType) => void;
+};
+
+export type SearchContextType = {
+  query: string;
+  setQuery: Dispatch<SetStateAction<string>>;
 };
