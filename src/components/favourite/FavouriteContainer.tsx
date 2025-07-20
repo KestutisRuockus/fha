@@ -25,6 +25,8 @@ function FavouriteContainer() {
 
   return (
     <div className="container">
+      <header>Favourite</header>
+
       {favouritePhotos.length === 0 ? (
         <div className="empty-favourite-container">
           <p>No favourite photos.</p>

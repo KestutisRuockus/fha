@@ -64,6 +64,13 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
 
   const { setView } = viewContext;
 
+  const handleOnClick = (component: ViewType) => {
+    setView(component);
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <aside className={isOpen ? "expanded" : "collapsed"}>
       <button
@@ -75,7 +82,11 @@ const Navbar = ({ isOpen, setIsOpen }: NavbarProps) => {
 
       <nav className={`${isOpen ? "expanded" : "collapsed"}`}>
         {navLinks.map((link) => (
-          <Link key={link.name} linkDetails={link} onClick={setView} />
+          <Link
+            key={link.name}
+            linkDetails={link}
+            onClick={() => handleOnClick(link.component)}
+          />
         ))}
       </nav>
     </aside>

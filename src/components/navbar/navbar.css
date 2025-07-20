@@ -28,6 +28,7 @@ aside {
   cursor: pointer;
   border: none;
   background-color: transparent;
+  outline: none;
 }
 
 .icon-wrapper.rotated {
@@ -60,14 +61,14 @@ nav.collapsed {
   left: -150%;
 }
 
-p {
+nav p {
   width: fit-content;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 4px;
 }
 
-p:hover {
+nav p:hover {
   border-bottom: 4px solid var(--border-color);
   padding-bottom: 0px;
   color: rgb(0, 0, 0, 0.5);

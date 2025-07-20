@@ -34,6 +34,8 @@ function ImagesContainer() {
 
   return (
     <div className="container">
+      <header>Photos</header>
+
       {imagesList.map((image, index) => {
         const isLast = index === imagesList.length - 1;
 
