@@ -23,8 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Add Vitest types */
     "types": ["vitest/globals", "vite/client"]
   },
-  "include": ["vite.config.ts", "src/**/*", "**/*.test.ts", "**/*.test.tsx"]
+  "include": ["vite.config.ts", "src/**/*"]
 }
